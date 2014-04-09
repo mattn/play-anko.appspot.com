@@ -3,6 +3,7 @@
     <link rel="stylesheet" href="/static/style.css" />
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
     <script src="/static/jquery-linedtextarea.js"></script>
+    <title>Anko Playground</title>
 </head>
 <body>
 <div id="banner">

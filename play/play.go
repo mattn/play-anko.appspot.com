@@ -5,7 +5,13 @@ import (
 	"appengine/datastore"
 	"crypto/sha1"
 	"fmt"
-	"github.com/mattn/anko/builtins"
+	anko_core "github.com/mattn/anko/builtins"
+	anko_flag "github.com/mattn/anko/builtins/flag"
+	anko_math "github.com/mattn/anko/builtins/math"
+	anko_path "github.com/mattn/anko/builtins/path"
+	anko_regexp "github.com/mattn/anko/builtins/regexp"
+	anko_sort "github.com/mattn/anko/builtins/sort"
+	anko_strings "github.com/mattn/anko/builtins/strings"
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 	"html/template"
@@ -54,7 +60,14 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	env := vm.NewEnv()
-	core.Import(env)
+	anko_core.Import(env)
+	anko_flag.Import(env)
+	anko_math.Import(env)
+	anko_path.Import(env)
+	anko_regexp.Import(env)
+	anko_sort.Import(env)
+	anko_strings.Import(env)
+
 	env.Define("println", reflect.ValueOf(func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
 	}))

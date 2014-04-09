@@ -5,6 +5,7 @@ import (
 	"appengine/datastore"
 	"crypto/sha1"
 	"fmt"
+	"github.com/mattn/anko/builtins"
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 	"html/template"
@@ -53,6 +54,7 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	env := vm.NewEnv()
+	core.Import(env)
 	env.Define("println", reflect.ValueOf(func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
 	}))

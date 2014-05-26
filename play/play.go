@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"fmt"
 	anko_core "github.com/mattn/anko/builtins"
+	anko_encoding "github.com/mattn/anko/builtins/encoding"
 	anko_flag "github.com/mattn/anko/builtins/flag"
 	anko_math "github.com/mattn/anko/builtins/math"
 	anko_path "github.com/mattn/anko/builtins/path"
@@ -54,13 +55,14 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 	stmts, err := parser.Parse(scanner)
 	if e, ok := err.(*parser.Error); ok {
 		w.WriteHeader(500)
-		fmt.Fprintf(w, e.Error())
+		fmt.Fprintf(w, "%d: %s\n", e.Pos.Line, err)
 		return
 	}
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	env := vm.NewEnv()
 	anko_core.Import(env)
+	anko_encoding.Import(env)
 	anko_flag.Import(env)
 	anko_math.Import(env)
 	anko_path.Import(env)

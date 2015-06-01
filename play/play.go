@@ -5,19 +5,31 @@ import (
 	"appengine/datastore"
 	"crypto/sha1"
 	"fmt"
-	anko_core "github.com/mattn/anko/builtins"
-	anko_encoding "github.com/mattn/anko/builtins/encoding"
-	anko_flag "github.com/mattn/anko/builtins/flag"
-	anko_math "github.com/mattn/anko/builtins/math"
-	anko_path "github.com/mattn/anko/builtins/path"
-	anko_regexp "github.com/mattn/anko/builtins/regexp"
-	anko_sort "github.com/mattn/anko/builtins/sort"
-	anko_strings "github.com/mattn/anko/builtins/strings"
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 	"html/template"
 	"net/http"
 	"reflect"
+
+	anko_core "github.com/mattn/anko/builtins"
+	anko_encoding_json "github.com/mattn/anko/builtins/encoding/json"
+	anko_flag "github.com/mattn/anko/builtins/flag"
+	anko_fmt "github.com/mattn/anko/builtins/fmt"
+	anko_io "github.com/mattn/anko/builtins/io"
+	anko_io_ioutil "github.com/mattn/anko/builtins/io/ioutil"
+	anko_math "github.com/mattn/anko/builtins/math"
+	anko_net "github.com/mattn/anko/builtins/net"
+	anko_net_http "github.com/mattn/anko/builtins/net/http"
+	anko_net_url "github.com/mattn/anko/builtins/net/url"
+	anko_os "github.com/mattn/anko/builtins/os"
+	anko_os_exec "github.com/mattn/anko/builtins/os/exec"
+	anko_path "github.com/mattn/anko/builtins/path"
+	anko_path_filepath "github.com/mattn/anko/builtins/path/filepath"
+	anko_regexp "github.com/mattn/anko/builtins/regexp"
+	anko_sort "github.com/mattn/anko/builtins/sort"
+	anko_strings "github.com/mattn/anko/builtins/strings"
+
+	anko_colortext "github.com/mattn/anko/builtins/github.com/daviddengcn/go-colortext"
 )
 
 type Record struct {
@@ -61,14 +73,35 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	env := vm.NewEnv()
+
 	anko_core.Import(env)
-	anko_encoding.Import(env)
-	anko_flag.Import(env)
-	anko_math.Import(env)
-	anko_path.Import(env)
-	anko_regexp.Import(env)
-	anko_sort.Import(env)
-	anko_strings.Import(env)
+
+	tbl := map[string]func(env *vm.Env) *vm.Env{
+		"encoding/json": anko_encoding_json.Import,
+		"flag":          anko_flag.Import,
+		"fmt":           anko_fmt.Import,
+		"io":            anko_io.Import,
+		"io/ioutil":     anko_io_ioutil.Import,
+		"math":          anko_math.Import,
+		"net":           anko_net.Import,
+		"net/http":      anko_net_http.Import,
+		"net/url":       anko_net_url.Import,
+		"os":            anko_os.Import,
+		"os/exec":       anko_os_exec.Import,
+		"path":          anko_path.Import,
+		"path/filepath": anko_path_filepath.Import,
+		"regexp":        anko_regexp.Import,
+		"sort":          anko_sort.Import,
+		"strings":       anko_strings.Import,
+		"github.com/daviddengcn/go-colortext": anko_colortext.Import,
+	}
+
+	env.Define("import", reflect.ValueOf(func(s string) interface{} {
+		if loader, ok := tbl[s]; ok {
+			return loader(env)
+		}
+		panic(fmt.Sprintf("package '%s' not found", s))
+	}))
 
 	env.Define("println", reflect.ValueOf(func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
@@ -114,7 +147,9 @@ func servePermalink(w http.ResponseWriter, r *http.Request) {
 		}
 		code = record.Code
 	} else {
-		code = `println("こんにちわ世界")`
+		code = `var fmt = import("fmt")
+
+println(fmt.Sprintf("こんにちわ世界 %05d", 123))`
 	}
 
 	err := t.Execute(w, &struct{ Code string }{Code: code})

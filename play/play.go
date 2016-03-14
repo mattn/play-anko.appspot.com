@@ -18,6 +18,7 @@ import (
 	anko_io "github.com/mattn/anko/builtins/io"
 	anko_io_ioutil "github.com/mattn/anko/builtins/io/ioutil"
 	anko_math "github.com/mattn/anko/builtins/math"
+	anko_math_rand "github.com/mattn/anko/builtins/math/rand"
 	anko_net "github.com/mattn/anko/builtins/net"
 	anko_net_http "github.com/mattn/anko/builtins/net/http"
 	anko_net_url "github.com/mattn/anko/builtins/net/url"
@@ -28,6 +29,7 @@ import (
 	anko_regexp "github.com/mattn/anko/builtins/regexp"
 	anko_sort "github.com/mattn/anko/builtins/sort"
 	anko_strings "github.com/mattn/anko/builtins/strings"
+	anko_time "github.com/mattn/anko/builtins/time"
 
 	anko_colortext "github.com/mattn/anko/builtins/github.com/daviddengcn/go-colortext"
 )
@@ -83,6 +85,7 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 		"io":            anko_io.Import,
 		"io/ioutil":     anko_io_ioutil.Import,
 		"math":          anko_math.Import,
+		"math/rand":     anko_math_rand.Import,
 		"net":           anko_net.Import,
 		"net/http":      anko_net_http.Import,
 		"net/url":       anko_net_url.Import,
@@ -93,6 +96,7 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 		"regexp":        anko_regexp.Import,
 		"sort":          anko_sort.Import,
 		"strings":       anko_strings.Import,
+		"time":          anko_time.Import,
 		"github.com/daviddengcn/go-colortext": anko_colortext.Import,
 	}
 

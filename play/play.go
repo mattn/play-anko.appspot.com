@@ -109,8 +109,8 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 	env.Define("print", reflect.ValueOf(func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprint(a...))
 	}))
-	env.Define("prinf", reflect.ValueOf(func(a ...interface{}) {
-		fmt.Fprinf(w, fmt.Sprintf(a...))
+	env.Define("prinf", reflect.ValueOf(func(a string, b ...interface{}) {
+		fmt.Fprintf(w, fmt.Sprintf(a, b...))
 	}))
 	env.Define("panic", reflect.ValueOf(func(a ...interface{}) {
 		w.WriteHeader(500)

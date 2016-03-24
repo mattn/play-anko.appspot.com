@@ -9,7 +9,6 @@ import (
 	"github.com/mattn/anko/vm"
 	"html/template"
 	"net/http"
-	"reflect"
 
 	anko_core "github.com/mattn/anko/builtins"
 	anko_encoding_json "github.com/mattn/anko/builtins/encoding/json"
@@ -100,32 +99,32 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 		"github.com/daviddengcn/go-colortext": anko_colortext.Import,
 	}
 
-	env.Define("import", reflect.ValueOf(func(s string) interface{} {
+	env.Define("import", func(s string) interface{} {
 		if loader, ok := tbl[s]; ok {
 			return loader(env)
 		}
 		panic(fmt.Sprintf("package '%s' not found", s))
-	}))
+	})
 
-	env.Define("println", reflect.ValueOf(func(a ...interface{}) {
+	env.Define("println", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
-	}))
-	env.Define("print", reflect.ValueOf(func(a ...interface{}) {
+	})
+	env.Define("print", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprint(a...))
-	}))
-	env.Define("prinf", reflect.ValueOf(func(a string, b ...interface{}) {
+	})
+	env.Define("prinf", func(a string, b ...interface{}) {
 		fmt.Fprintf(w, fmt.Sprintf(a, b...))
-	}))
-	env.Define("panic", reflect.ValueOf(func(a ...interface{}) {
+	})
+	env.Define("panic", func(a ...interface{}) {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Can't use panic()")
 		return
-	}))
-	env.Define("load", reflect.ValueOf(func(a ...interface{}) {
+	})
+	env.Define("load", func(a ...interface{}) {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Can't use load()")
 		return
-	}))
+	})
 	defer env.Destroy()
 	_, err = vm.Run(stmts, env)
 	if err != nil {

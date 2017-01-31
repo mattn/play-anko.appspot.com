@@ -1,14 +1,16 @@
 package play
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"crypto/sha1"
 	"fmt"
-	"github.com/mattn/anko/parser"
-	"github.com/mattn/anko/vm"
 	"html/template"
 	"net/http"
+
+	"github.com/mattn/anko/parser"
+	"github.com/mattn/anko/vm"
+
+	"appengine"
+	"appengine/datastore"
 
 	anko_core "github.com/mattn/anko/builtins"
 	anko_encoding_json "github.com/mattn/anko/builtins/encoding/json"
@@ -17,6 +19,7 @@ import (
 	anko_io "github.com/mattn/anko/builtins/io"
 	anko_io_ioutil "github.com/mattn/anko/builtins/io/ioutil"
 	anko_math "github.com/mattn/anko/builtins/math"
+	anko_math_big "github.com/mattn/anko/builtins/math/big"
 	anko_math_rand "github.com/mattn/anko/builtins/math/rand"
 	anko_net "github.com/mattn/anko/builtins/net"
 	anko_net_http "github.com/mattn/anko/builtins/net/http"
@@ -84,6 +87,7 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 		"io":            anko_io.Import,
 		"io/ioutil":     anko_io_ioutil.Import,
 		"math":          anko_math.Import,
+		"math/big":      anko_math_big.Import,
 		"math/rand":     anko_math_rand.Import,
 		"net":           anko_net.Import,
 		"net/http":      anko_net_http.Import,
@@ -108,12 +112,21 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 
 	env.Define("println", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
 	})
 	env.Define("print", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprint(a...))
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
 	})
-	env.Define("prinf", func(a string, b ...interface{}) {
+	env.Define("printf", func(a string, b ...interface{}) {
 		fmt.Fprintf(w, fmt.Sprintf(a, b...))
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
 	})
 	env.Define("panic", func(a ...interface{}) {
 		w.WriteHeader(500)

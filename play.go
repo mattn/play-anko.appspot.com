@@ -6,34 +6,13 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/mattn/anko/core"
+	"github.com/mattn/anko/packages"
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 
 	"appengine"
 	"appengine/datastore"
-
-	anko_core "github.com/mattn/anko/builtins"
-	anko_encoding_json "github.com/mattn/anko/builtins/encoding/json"
-	anko_flag "github.com/mattn/anko/builtins/flag"
-	anko_fmt "github.com/mattn/anko/builtins/fmt"
-	anko_io "github.com/mattn/anko/builtins/io"
-	anko_io_ioutil "github.com/mattn/anko/builtins/io/ioutil"
-	anko_math "github.com/mattn/anko/builtins/math"
-	anko_math_big "github.com/mattn/anko/builtins/math/big"
-	anko_math_rand "github.com/mattn/anko/builtins/math/rand"
-	anko_net "github.com/mattn/anko/builtins/net"
-	anko_net_http "github.com/mattn/anko/builtins/net/http"
-	anko_net_url "github.com/mattn/anko/builtins/net/url"
-	anko_os "github.com/mattn/anko/builtins/os"
-	anko_os_exec "github.com/mattn/anko/builtins/os/exec"
-	anko_path "github.com/mattn/anko/builtins/path"
-	anko_path_filepath "github.com/mattn/anko/builtins/path/filepath"
-	anko_regexp "github.com/mattn/anko/builtins/regexp"
-	anko_sort "github.com/mattn/anko/builtins/sort"
-	anko_strings "github.com/mattn/anko/builtins/strings"
-	anko_time "github.com/mattn/anko/builtins/time"
-
-	anko_colortext "github.com/mattn/anko/builtins/github.com/daviddengcn/go-colortext"
 )
 
 type Record struct {
@@ -78,37 +57,8 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	env := vm.NewEnv()
 
-	anko_core.Import(env)
-
-	tbl := map[string]func(env *vm.Env) *vm.Env{
-		"encoding/json": anko_encoding_json.Import,
-		"flag":          anko_flag.Import,
-		"fmt":           anko_fmt.Import,
-		"io":            anko_io.Import,
-		"io/ioutil":     anko_io_ioutil.Import,
-		"math":          anko_math.Import,
-		"math/big":      anko_math_big.Import,
-		"math/rand":     anko_math_rand.Import,
-		"net":           anko_net.Import,
-		"net/http":      anko_net_http.Import,
-		"net/url":       anko_net_url.Import,
-		"os":            anko_os.Import,
-		"os/exec":       anko_os_exec.Import,
-		"path":          anko_path.Import,
-		"path/filepath": anko_path_filepath.Import,
-		"regexp":        anko_regexp.Import,
-		"sort":          anko_sort.Import,
-		"strings":       anko_strings.Import,
-		"time":          anko_time.Import,
-		"github.com/daviddengcn/go-colortext": anko_colortext.Import,
-	}
-
-	env.Define("import", func(s string) interface{} {
-		if loader, ok := tbl[s]; ok {
-			return loader(env)
-		}
-		panic(fmt.Sprintf("package '%s' not found", s))
-	})
+	core.Import(env)
+	packages.DefineImport(env)
 
 	env.Define("println", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))

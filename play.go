@@ -11,8 +11,8 @@ import (
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 
-	"appengine"
-	"appengine/datastore"
+	"google.golang.org/appengine"
+	"google.golang.org/appengine/datastore"
 )
 
 type Record struct {

@@ -4,7 +4,9 @@ import (
 	"crypto/sha1"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/mattn/anko/core"
 	"github.com/mattn/anko/packages"
@@ -19,9 +21,18 @@ type Record struct {
 	Code string
 }
 
-var t = template.Must(template.ParseFiles("tmpl/index.tpl"))
+var (
+	t      = template.Must(template.ParseFiles("tmpl/index.tpl"))
+	commit string
+)
 
 func init() {
+	b, err := ioutil.ReadFile("VERSION")
+	if err != nil {
+		panic(err)
+	}
+	commit = strings.TrimSpace(string(b))
+
 	http.HandleFunc("/api/play", serveApiPlay)
 	http.HandleFunc("/api/save", serveApiSave)
 	http.HandleFunc("/p/", servePermalink)
@@ -121,7 +132,15 @@ func servePermalink(w http.ResponseWriter, r *http.Request) {
 println(fmt.Sprintf("こんにちわ世界 %05d", 123))`
 	}
 
-	err := t.Execute(w, &struct{ Code string }{Code: code})
+	err := t.Execute(w, &struct {
+		Code        string
+		Commit      string
+		CommitShort string
+	}{
+		Code:        code,
+		Commit:      commit,
+		CommitShort: commit[:8],
+	})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

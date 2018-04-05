@@ -15,7 +15,7 @@
 </div>
 
 <div style="position: absolute; top: 60px; font-size: 11px; width: 75%">
-   This is where you can test out <a href="https://github.com/mattn/anko">anko</a>, a scriptable interpreter written in golang. If you find any behaviors that you think should work but don't, <a href="https://github.com/mattn/anko/issues">please file an issue</a> with the link to this code (press the "Share" button above, then copy the URL)
+   This is where you can test out <a href="https://github.com/mattn/anko">anko</a> rev <a href="https://github.com/mattn/anko/commit/{{.Commit}}">{{.CommitShort}}</a>, a scriptable interpreter written in golang. If you find any behaviors that you think should work but don't, <a href="https://github.com/mattn/anko/issues">please file an issue</a> with the link to this code (press the "Share" button above, then copy the URL)
 </div>
 
 <div id="wrap">

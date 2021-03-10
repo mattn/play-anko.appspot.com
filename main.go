@@ -1,4 +1,4 @@
-package play
+package main
 
 import (
 	"crypto/sha1"
@@ -26,19 +26,6 @@ var (
 	t      = template.Must(template.ParseFiles("tmpl/index.tpl"))
 	commit string
 )
-
-func init() {
-	b, err := ioutil.ReadFile("VERSION")
-	if err != nil {
-		panic(err)
-	}
-	commit = strings.TrimSpace(string(b))
-
-	http.HandleFunc("/api/play", serveApiPlay)
-	http.HandleFunc("/api/save", serveApiSave)
-	http.HandleFunc("/p/", servePermalink)
-	http.HandleFunc("/", servePermalink)
-}
 
 func serveApiSave(w http.ResponseWriter, r *http.Request) {
 	code := r.FormValue("code")
@@ -144,4 +131,18 @@ println(fmt.Sprintf("こんにちわ世界 %05d", 123))`
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func main() {
+	b, err := ioutil.ReadFile("VERSION")
+	if err != nil {
+		panic(err)
+	}
+	commit = strings.TrimSpace(string(b))
+
+	http.HandleFunc("/api/play", serveApiPlay)
+	http.HandleFunc("/api/save", serveApiSave)
+	http.HandleFunc("/p/", servePermalink)
+	http.HandleFunc("/", servePermalink)
+	http.ListenAndServe(":8080", nil)
 }

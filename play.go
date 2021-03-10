@@ -9,7 +9,8 @@ import (
 	"strings"
 
 	"github.com/mattn/anko/core"
-	"github.com/mattn/anko/packages"
+	"github.com/mattn/anko/env"
+	_ "github.com/mattn/anko/packages"
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 
@@ -66,41 +67,39 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	env := vm.NewEnv()
+	e := env.NewEnv()
 
-	core.Import(env)
-	packages.DefineImport(env)
+	core.Import(e)
 
-	env.Define("println", func(a ...interface{}) {
+	e.Define("println", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprintln(a...))
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
 	})
-	env.Define("print", func(a ...interface{}) {
+	e.Define("print", func(a ...interface{}) {
 		fmt.Fprint(w, fmt.Sprint(a...))
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
 	})
-	env.Define("printf", func(a string, b ...interface{}) {
+	e.Define("printf", func(a string, b ...interface{}) {
 		fmt.Fprintf(w, fmt.Sprintf(a, b...))
 		if f, ok := w.(http.Flusher); ok {
 			f.Flush()
 		}
 	})
-	env.Define("panic", func(a ...interface{}) {
+	e.Define("panic", func(a ...interface{}) {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Can't use panic()")
 		return
 	})
-	env.Define("load", func(a ...interface{}) {
+	e.Define("load", func(a ...interface{}) {
 		w.WriteHeader(500)
 		fmt.Fprintf(w, "Can't use load()")
 		return
 	})
-	defer env.Destroy()
-	_, err = vm.Run(stmts, env)
+	_, err = vm.Run(e, nil, stmts)
 	if err != nil {
 		w.WriteHeader(500)
 		if e, ok := err.(*vm.Error); ok {

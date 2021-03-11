@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"strings"
 
 	"github.com/mattn/anko/core"
@@ -93,6 +94,24 @@ func serveApiPlay(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Can't use load()")
 		return
 	})
+
+	pkg, ok := env.Packages["fmt"]
+	if ok {
+		pkg["Print"] = reflect.ValueOf(func(a ...interface{}) (n int, err error) {
+			return fmt.Fprint(w, a...)
+		})
+		pkg["Printf"] = reflect.ValueOf(func(format string, a ...interface{}) (n int, err error) {
+			return fmt.Fprintf(w, format, a...)
+		})
+		pkg["Println"] = reflect.ValueOf(func(a ...interface{}) (n int, err error) {
+			return fmt.Fprintln(w, a...)
+		})
+	}
+	pkg, ok = env.Packages["os"]
+	if ok {
+		pkg["Stdout"] = reflect.ValueOf(w)
+	}
+
 	_, err = vm.Run(e, nil, stmts)
 	if err != nil {
 		w.WriteHeader(500)

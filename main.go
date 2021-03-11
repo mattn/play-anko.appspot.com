@@ -35,7 +35,8 @@ func serveApiSave(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 	client, err := clouddatastore.FromContext(ctx)
 	if err != nil {
-		panic(err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 	defer client.Close()
 

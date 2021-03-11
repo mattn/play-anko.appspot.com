@@ -46,7 +46,7 @@ func serveApiSave(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "%s", key.ID())
+	fmt.Fprint(w, key.Name())
 }
 
 func serveApiPlay(w http.ResponseWriter, r *http.Request) {

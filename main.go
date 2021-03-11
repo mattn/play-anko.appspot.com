@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"html/template"
@@ -14,8 +15,7 @@ import (
 	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 
-	"google.golang.org/appengine"
-	"google.golang.org/appengine/datastore"
+	"go.mercari.io/datastore/clouddatastore"
 )
 
 type Record struct {
@@ -32,14 +32,20 @@ func serveApiSave(w http.ResponseWriter, r *http.Request) {
 	h := sha1.New()
 	fmt.Fprintf(h, "%s", code)
 	hid := fmt.Sprintf("%x", h.Sum(nil))
-	c := appengine.NewContext(r)
-	key := datastore.NewKey(c, "Anko", hid, 0, nil)
-	_, err := datastore.Put(c, key, &Record{code})
+	ctx := context.Background()
+	client, err := clouddatastore.FromContext(ctx)
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close()
+
+	key := client.NameKey("Anko", hid, nil)
+	_, err = client.Put(ctx, key, &Record{code})
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, "%s", key.StringID())
+	fmt.Fprintf(w, "%s", key.ID())
 }
 
 func serveApiPlay(w http.ResponseWriter, r *http.Request) {
@@ -104,9 +110,18 @@ func servePermalink(w http.ResponseWriter, r *http.Request) {
 	var code string
 	if len(path) > 3 {
 		id := path[3:]
-		c := appengine.NewContext(r)
 		var record Record
-		err := datastore.Get(c, datastore.NewKey(c, "Anko", id, 0, nil), &record)
+
+		ctx := context.Background()
+		client, err := clouddatastore.FromContext(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		defer client.Close()
+
+		key := client.NameKey("Anko", id, nil)
+		err = client.Get(ctx, key, &record)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return

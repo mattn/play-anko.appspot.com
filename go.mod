@@ -4,5 +4,5 @@ go 1.15
 
 require (
 	github.com/mattn/anko v0.1.8
-	google.golang.org/appengine v1.6.7
+	go.mercari.io/datastore v1.7.1
 )
